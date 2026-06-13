@@ -10,19 +10,33 @@ end procedure;
 
 function TSTEvalList(f, args)
     n := #args;
-    if n eq 0 then
-        return f();
-    elif n eq 1 then
-        return f(args[1]);
-    elif n eq 2 then
-        return f(args[1], args[2]);
-    elif n eq 3 then
-        return f(args[1], args[2], args[3]);
-    elif n eq 4 then
-        return f(args[1], args[2], args[3], args[4]);
-    else
-        error "ApplyList only supports lists of length up to 4 (extend if needed)";
+    try
+        if n eq 0 then
+            return f();
+        elif n eq 1 then
+            return f(args[1]);
+        elif n eq 2 then
+            return f(args[1], args[2]);
+        elif n eq 3 then
+            return f(args[1], args[2], args[3]);
+        elif n eq 4 then
+            return f(args[1], args[2], args[3], args[4]);
+        else
+            error "ApplyList only supports lists of length up to 4 (extend if needed)";
+        end if;
+    catch err
+        if not ("Attempt to call user procedure" in err`Object) then
+            error err`Object;
+        end if;
+    end try;
+    // f is a procedure; call without return
+    if n eq 0 then f();
+    elif n eq 1 then f(args[1]);
+    elif n eq 2 then f(args[1], args[2]);
+    elif n eq 3 then f(args[1], args[2], args[3]);
+    elif n eq 4 then f(args[1], args[2], args[3], args[4]);
     end if;
+    return 0;
 end function;
 
 procedure TSTAssertRaises(f, message, args, ...)

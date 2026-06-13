@@ -20,14 +20,8 @@ procedure test_AssertEQ_sequences()
     TSTAssertEQ([], []);
 end procedure;
 
-// Wrapper needed because TSTAssertEQ is a procedure, not a function.
-function wrap_assert_eq(a, b)
-    TSTAssertEQ(a, b);
-    return 0;
-end function;
-
 procedure test_AssertEQ_fails_on_unequal()
-    TSTAssertRaises(wrap_assert_eq, "", [1, 2]);
+    TSTAssertRaises(TSTAssertEQ, "", [1, 2]);
 end procedure;
 
 // --- TSTAssertNE ---
@@ -41,13 +35,8 @@ procedure test_AssertNE_strings()
     TSTAssertNE("hello", "world");
 end procedure;
 
-function wrap_assert_ne(a, b)
-    TSTAssertNE(a, b);
-    return 0;
-end function;
-
 procedure test_AssertNE_fails_on_equal()
-    TSTAssertRaises(wrap_assert_ne, "", [1, 1]);
+    TSTAssertRaises(TSTAssertNE, "", [1, 1]);
 end procedure;
 
 // --- TSTAssertRaises ---
@@ -69,17 +58,20 @@ function identity(x)
     return x;
 end function;
 
-function wrap_assert_raises(f, msg, args)
-    TSTAssertRaises(f, msg, args);
-    return 0;
-end function;
-
 procedure test_AssertRaises_fails_when_no_error_raised()
-    TSTAssertRaises(wrap_assert_raises, "", [* identity, "", [42] *]);
+    TSTAssertRaises(TSTAssertRaises, "", [* identity, "", [42] *]);
 end procedure;
 
 procedure test_AssertRaises_fails_on_message_mismatch()
-    TSTAssertRaises(wrap_assert_raises, "", [* raise_with_message, "expected", ["different"] *]);
+    TSTAssertRaises(TSTAssertRaises, "", [* raise_with_message, "expected", ["different"] *]);
+end procedure;
+
+procedure error_proc(x)
+    error "proc boom";
+end procedure;
+
+procedure test_AssertRaises_with_procedure()
+    TSTAssertRaises(error_proc, "proc boom", [42]);
 end procedure;
 
 // --- run all ---
@@ -95,6 +87,7 @@ test_AssertRaises_catches_expected_error();
 test_AssertRaises_matches_substring();
 test_AssertRaises_fails_when_no_error_raised();
 test_AssertRaises_fails_on_message_mismatch();
+test_AssertRaises_with_procedure();
 
 print "All tests finished!";
 exit;
